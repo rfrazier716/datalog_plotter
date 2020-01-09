@@ -182,7 +182,10 @@ def import_data_from_file(file_path):
         headers = [header for header in next(reader) if header]  # extract headers and only return nonempty strings
         headers[0] = headers[0][1:]  # get rid of the comment character on the first header
         next(reader)  # consume the next line which is a comment divider
-        data = np.array(list(reader)).astype(float)  # import data
+        data = np.array(list(reader))  # import data
+        if data[-1,-1]=="": # if we imported an empty column by accident
+            data=data[:,:-1] # delete that last column
+        data=data.astype("float")
         # convert data to a dict of columns
         data_dict = {field_name: data for field_name, data in zip(headers, data.T)}
         return headers, data_dict

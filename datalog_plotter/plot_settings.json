@@ -2,9 +2,9 @@
   {
       "name": "Plot 1",
       "subplot": 211,
-      "y_label": "ADC Codes",
+      "y_label": "Swap 2 Ratio",
       "decimation": 1,
-      "function": "$SlotACh1 $SlotACh2 ADD $SlotBCh1 $SlotBCh2 ADD MUL"
+      "function": "$SlotECh1 $SlotCCh2 SUB $SlotECh1 $SlotACh1 SUB ADD $SlotECh2 SlotCCh1 SUB SltECh2 SlotACh2 SUB ADD DIV"
   },
   {
       "name": "Plot 2",
