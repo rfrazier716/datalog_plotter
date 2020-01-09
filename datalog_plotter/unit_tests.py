@@ -5,6 +5,7 @@ from datalog_plotter import *
 
 file_directory="test_data\\Test Dataset_2020101_111111"
 test_data_file=Path(file_directory) / "data"/"dut0.dat"
+test_plot_settings_file=Path("test_data") / "test_plot_settings.json"
 
 class Tests(unittest.TestCase):
     def test_folder_import(self):
@@ -42,16 +43,29 @@ class Tests(unittest.TestCase):
         calc = RPNWithData()  # make a new calculator
         _, data_dict = import_data_from_file(test_data_file)
         calc.load_data(data_dict)
-        self.assertEqual(np.sum(calc.calculate("$SltACh1 8 MUL")), 800)  # multiply by a constant
-        self.assertEqual(np.sum(calc.calculate("2 $SltBCh1 DIV")), 100)  # divide by a constant
-        self.assertEqual(np.sum(calc.calculate("$SltACh1 8 ADD")), 900)  # add a constant
-        self.assertEqual(np.sum(calc.calculate("8 $SltDCh2 SUB")), 0)  # subtract a constant
-        self.assertAlmostEqual(calc.calculate("$SltACh1 $SltDCh2 MUL")[0], 8)  # Multiply two arrays
-        self.assertAlmostEqual(calc.calculate("$SltACh2 $SltDCh2 SUB")[0], 4)  # Divide two arrays
-        self.assertAlmostEqual(calc.calculate("$SltACh1 $SltDCh2 ADD")[0], 9)  # Add two arrays
-        self.assertAlmostEqual(calc.calculate("$SltACh1 $SltDCh2 SUB")[0], 7)  # Subtract two arrays
+        self.assertEqual(np.sum(calc.calculate("$SlotACh1 8 MUL")), 800)  # multiply by a constant
+        self.assertEqual(np.sum(calc.calculate("2 $SlotBCh1 DIV")), 150)  # divide by a constant
+        self.assertEqual(np.sum(calc.calculate("$SlotACh1 8 ADD")), 900)  # add a constant
+        self.assertEqual(np.sum(calc.calculate("8 $SlotDCh2 SUB")), 0)  # subtract a constant
+        self.assertAlmostEqual(calc.calculate("$SlotACh1 $SlotDCh2 MUL")[0], 8)  # Multiply two arrays
+        self.assertAlmostEqual(calc.calculate("$SlotACh2 $SlotDCh2 DIV")[0], 4)  # Divide two arrays
+        self.assertAlmostEqual(calc.calculate("$SlotACh1 $SlotDCh2 ADD")[0], 9)  # Add two arrays
+        self.assertAlmostEqual(calc.calculate("$SlotACh1 $SlotDCh2 SUB")[0], 7)  # Subtract two arrays
 
     def test_RPN_complex_math(self):
         calc = RPNWithData() # make a new calculator
         self.assertEqual(calc.calculate("4 8 8 ADD DIV SQR"),2)
+
+    def test_json_import(self):
+        plot_parameters=import_plot_settings(test_plot_settings_file)
+        self.assertEqual(plot_parameters[0].name,"Plot 1")
+        self.assertEqual(plot_parameters[0].decimation , 1)
+        self.assertEqual(plot_parameters[1].subplot_value , 111)
+        self.assertEqual(plot_parameters[1].rpn_calculation , "5 $SlotACh2 MUL")
+
+    def test_plot_generation(self):
+        try:
+            generate_plots(Path(file_directory)/ "data",test_plot_settings_file)
+        except:
+            self.fail("passing no arguments to test directory raised an exception")
 

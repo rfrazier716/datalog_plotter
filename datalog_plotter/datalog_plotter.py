@@ -1,8 +1,18 @@
 from pathlib import Path
 import numpy as np
 import csv
-import itertools
 import json
+import math
+from matplotlib import pyplot as plt
+
+
+class PlotParameter():
+    def __init__(self, name, subplot,y_label, decimation, rpn_calculation):
+        self.name = name
+        self.subplot_value = subplot
+        self.y_label=y_label
+        self.decimation = decimation
+        self.rpn_calculation = rpn_calculation
 
 
 class RPNWithData():
@@ -77,6 +87,12 @@ class RPNWithData():
         self._stack.append(res)
 
 
+def decimate_data(array,decimation):
+    # decimates the array and returns the decimated data
+    array=array[0:round(decimation*math.floor(array.size/decimation))]
+    dec_array=np.mean(array.reshape((round(array.size/decimation),decimation)),axis=1)
+    return dec_array
+
 def get_test_directory(*args):
     if args:
         # if the directory was provides as a command line argument do not have user select one
@@ -90,6 +106,7 @@ def get_test_directory(*args):
         root.withdraw()  # make a root window but hide it
 
         file_path = Path(filedialog.askdirectory(title="Select Test Folder"))
+        root.destroy()
 
     # verify file is a directory
     if not file_path.is_dir():
@@ -101,9 +118,62 @@ def get_test_directory(*args):
     return file_path
 
 
-def generate_plots(data_folder):
-    for file_path in data_folder.glob("*.dat"):
-        data = np.genfromtxt(file_path, dtype="float", delimiter='\t', names=True)
+def verbose_function_call(function, args, comment=""):
+    print(comment + "... ", end="")
+    return_value = function(*args)
+    print("Success!")
+    return return_value
+
+
+def import_plot_settings(file_path):
+    # returns a list of plot parameter objects who's settings are stored in a json file
+    json_data = None
+    with open(file_path) as file:
+        json_data = json.load(file)  # load the file into a dict
+    return [PlotParameter(plot["name"], plot["subplot"],plot["y_label"], plot["decimation"], plot["function"])
+            for plot in json_data["plots"]]
+
+
+def generate_plots(data_folder, plot_settings_path):
+    # import plot settings from JSON file
+    plot_settings = verbose_function_call(import_plot_settings, [plot_settings_path], "Importing Plot Settings")
+    files = list(data_folder.glob("*.dat"))  # list of test files
+    print("found {} data file(s) in test folder".format(len(files)))
+
+    for fig_num,file_path in enumerate(files):
+        # for every file import data
+        print("\nProcessing {}".format(file_path.name))
+        _, data_dict = verbose_function_call(import_data_from_file, [file_path], "Importing Data")
+        calc=RPNWithData(data_dict) # make an RPN calculator for this dataset
+
+        fig=plt.figure(fig_num) # set the figure
+        fig.suptitle(file_path.stem, fontsize=16)
+        time_arr=(data_dict["Epoch Time"]-data_dict["Epoch Time"][0])/60 # convert time from seconds to minutes from st
+        subplots={} # dict of existing subplots
+        for fn_num,plot_function in enumerate(plot_settings):
+            print("Generating function {}. equation: {}".format(fn_num,plot_function.rpn_calculation))
+            # in this figure make the required subplot and plot the data
+
+            # set to the required subplot by either creating one or reusing one
+            try:
+                ax=subplots[plot_function.subplot_value] # try to recall the existing subplot
+            except KeyError:
+                # if it does not exist make a new subplot
+                subplots[plot_function.subplot_value]=fig.add_subplot(plot_function.subplot_value)
+                ax = subplots[plot_function.subplot_value]
+
+
+            x_val = decimate_data(time_arr, plot_function.decimation)  # decimate the time field
+            # create they y-value of the function
+            y_val=decimate_data(calc.calculate(plot_function.rpn_calculation),plot_function.decimation)
+            # plot the requested data
+            ax.plot(x_val,y_val,label=plot_function.name) # plot the requested function
+            ax.set_ylabel(plot_function.y_label) # set the Y-Axis Label
+            ax.set_xlabel("Time (min)") # set the X-Axis label
+            ax.legend() # update the legend
+    plt.legend()
+    plt.show()
+
 
 
 def import_data_from_file(file_path):
@@ -122,8 +192,9 @@ def main():
     # get path of folder to import data
     parent_path = get_test_directory()
     data_folder = parent_path / "data"
-    generate_plots(data_folder)
-    # get path of folder to import data
+    plot_settings_file=Path("plot_settings.json")
+    generate_plots(data_folder,plot_settings_file)
+    print("Program Done, exiting")
 
 
 if __name__ == "__main__":

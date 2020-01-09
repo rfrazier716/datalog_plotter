@@ -1,14 +1,14 @@
 {"plots":[
   {
       "name": "Plot 1",
-      "subplot": 211,
-      "y_label": "ADC Codes",
+      "subplot": 111,
+      "y_label": "Swap 2 Ratio (A.U)",
       "decimation": 1,
       "function": "$SlotACh1 $SlotACh2 ADD $SlotBCh1 $SlotBCh2 ADD MUL"
   },
   {
       "name": "Plot 2",
-      "subplot": 212,
+      "subplot": 111,
       "y_label": "ADC Codes",
       "decimation": 1,
       "function": "5 $SlotACh2 MUL"
