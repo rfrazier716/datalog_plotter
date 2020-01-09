@@ -1,0 +1,10 @@
+{"plots":[
+  {
+      "name": "Plot 1",
+      "function": "SltA1 SltA2 ADD SltB1 SltB2 ADD MUL"
+  },
+  {
+      "name": "Plot 2",
+      "function": "%5 SltA2 MUL"
+  }
+]}

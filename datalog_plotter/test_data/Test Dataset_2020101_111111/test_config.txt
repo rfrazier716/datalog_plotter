@@ -1,0 +1,15 @@
+{
+	"test_name":"Generic Test",
+	"n_duts":1,
+	"record_temp":false,
+	"reset_duts":false,
+	"assign_i2c":false,
+	"write_metadata":true,
+	"multi_config_files":false,
+	"dut_config_files":
+	[
+	],
+	"preprocessor_commands":
+	[
+	]
+}
