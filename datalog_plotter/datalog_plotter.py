@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 import numpy as np
 import csv
@@ -5,6 +6,8 @@ import json
 import math
 from matplotlib import pyplot as plt
 
+version_major=1
+version_minor=0
 
 class PlotParameter():
     def __init__(self, name, subplot,y_label, normalize, decimation, rpn_calculation):
@@ -47,7 +50,7 @@ class RPNWithData():
             else:
                 # variable names must be prefixed by a $ or else it will try to parse things as a number
                 if command[0] == "$":
-                    self._stack.append(self._data[command[1:]])  # append data to the stack
+                    self._stack.append(self._data.get(command[1:],0))  # append data to the stack, if data field doesn't exist write a zero
                 else:
                     self._stack.append(float(command))  # turn the command into a number and push onto stack
         # at the end of the calculation, return the furthest  value on the stack which is the response
@@ -99,6 +102,7 @@ def get_test_directory(*args):
         # if the directory was provides as a command line argument do not have user select one
         file_path = Path(args[0])
     else:
+        print("no directory provided, please select path to test file")
         # if we didn't provide a path make a dialog box to select it
         import tkinter as tk  # import tkinter
         from tkinter import filedialog  # import the file dialog
@@ -196,11 +200,19 @@ def import_data_from_file(file_path):
         return headers, data_dict
 
 
+def create_processed_data_folder(parent_path):
+    processed_data_path=parent_path / "processed"
+    if not processed_data_path.exists():
+        processed_data_path.mkdir()
+
 def main():
     # get path of folder to import data
+    print("ADPD5000 Datalog Plotter V{}.{}".format(version_major,version_minor))
     parent_path = get_test_directory()
+    create_processed_data_folder(parent_path) # make a path if one does not exist to store the data
     data_folder = parent_path / "data"
     plot_settings_file=Path("plot_settings.json")
+    #TODO: Validate RPN Equations with REGEX and Raise error if 
     generate_plots(data_folder,plot_settings_file)
     print("Program Done, exiting")
 
