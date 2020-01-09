@@ -4,6 +4,7 @@
       "subplot": 111,
       "y_label": "Swap 2 Ratio (A.U)",
       "decimation": 1,
+      "normalize": true,
       "function": "$SlotACh1 $SlotACh2 ADD $SlotBCh1 $SlotBCh2 ADD MUL"
   },
   {
@@ -11,6 +12,7 @@
       "subplot": 111,
       "y_label": "ADC Codes",
       "decimation": 1,
+      "normalize": true,
       "function": "5 $SlotACh2 MUL"
   }
 ]}

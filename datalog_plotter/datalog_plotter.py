@@ -7,10 +7,11 @@ from matplotlib import pyplot as plt
 
 
 class PlotParameter():
-    def __init__(self, name, subplot,y_label, decimation, rpn_calculation):
+    def __init__(self, name, subplot,y_label, normalize, decimation, rpn_calculation):
         self.name = name
         self.subplot_value = subplot
         self.y_label=y_label
+        self.normalize=normalize
         self.decimation = decimation
         self.rpn_calculation = rpn_calculation
 
@@ -130,7 +131,7 @@ def import_plot_settings(file_path):
     json_data = None
     with open(file_path) as file:
         json_data = json.load(file)  # load the file into a dict
-    return [PlotParameter(plot["name"], plot["subplot"],plot["y_label"], plot["decimation"], plot["function"])
+    return [PlotParameter(plot["name"], plot["subplot"],plot["y_label"], plot["normalize"], plot["decimation"], plot["function"])
             for plot in json_data["plots"]]
 
 
@@ -166,6 +167,10 @@ def generate_plots(data_folder, plot_settings_path):
             x_val = decimate_data(time_arr, plot_function.decimation)  # decimate the time field
             # create they y-value of the function
             y_val=decimate_data(calc.calculate(plot_function.rpn_calculation),plot_function.decimation)
+
+            if plot_function.normalize: # if we want to normalize the data
+                y_val=y_val/np.mean(y_val[:10])  # divide by the average of the first 10 datapoints
+
             # plot the requested data
             ax.plot(x_val,y_val,label=plot_function.name) # plot the requested function
             ax.set_ylabel(plot_function.y_label) # set the Y-Axis Label

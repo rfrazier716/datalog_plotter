@@ -1,16 +1,18 @@
 {"plots":[
   {
-      "name": "Plot 1",
-      "subplot": 211,
+      "name": "Sensor Path 1",
+      "subplot": 111,
       "y_label": "Swap 2 Ratio",
-      "decimation": 1,
-      "function": "$SlotECh1 $SlotCCh2 SUB $SlotECh1 $SlotACh1 SUB ADD $SlotECh2 SlotCCh1 SUB SltECh2 SlotACh2 SUB ADD DIV"
+      "decimation": 1000,
+      "normalize": true,
+      "function": "$SlotECh1 $SlotCCh2 SUB $SlotECh1 $SlotACh1 SUB ADD $SlotECh2 $SlotCCh1 SUB $SlotECh2 $SlotACh2 SUB ADD DIV"
   },
   {
-      "name": "Plot 2",
-      "subplot": 212,
-      "y_label": "ADC Codes",
-      "decimation": 1,
-      "function": "5 $SlotACh2 MUL"
+      "name": "Sensor Path 2",
+      "subplot": 111,
+      "y_label": "Swap 2 Ratio",
+      "decimation": 1000,
+      "normalize": true,
+      "function": "$SlotFCh1 $SlotDCh2 SUB $SlotFCh1 $SlotBCh1 SUB ADD $SlotFCh2 $SlotDCh1 SUB $SlotFCh2 $SlotBCh2 SUB ADD DIV"
   }
 ]}
