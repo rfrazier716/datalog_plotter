@@ -68,4 +68,3 @@ class Tests(unittest.TestCase):
             generate_plots(Path(file_directory)/ "data",test_plot_settings_file)
         except:
             self.fail("passing no arguments to test directory raised an exception")
-

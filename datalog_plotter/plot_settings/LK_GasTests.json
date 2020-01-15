@@ -1,17 +1,17 @@
 {"plots":[
   {
       "name": "Sensor Path 1",
-      "subplot": 111,
+      "subplot": 211,
       "y_label": "Swap 2 Ratio",
-      "decimation": 1000,
+      "decimation": 100,
       "normalize": true,
       "function": "$SlotECh1 $SlotCCh2 SUB $SlotECh1 $SlotACh1 SUB ADD $SlotECh2 $SlotCCh1 SUB $SlotECh2 $SlotACh2 SUB ADD DIV"
   },
   {
       "name": "Sensor Path 2",
-      "subplot": 111,
+      "subplot": 211,
       "y_label": "Swap 2 Ratio",
-      "decimation": 1000,
+      "decimation": 100,
       "normalize": true,
       "function": "$SlotFCh1 $SlotDCh2 SUB $SlotFCh1 $SlotBCh1 SUB ADD $SlotFCh2 $SlotDCh1 SUB $SlotFCh2 $SlotBCh2 SUB ADD DIV"
   }
