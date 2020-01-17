@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import terminalio
 
 version_major = 1
-version_minor = 1
+version_minor = 2
 
 
 class PlotParameter():
@@ -143,12 +143,30 @@ def import_plot_settings(file_path):
                           plot["function"])
             for plot in json_data["plots"]]
 
+def set_subplots(fig,subplots,plot_function):
+    try:
+        ax = subplots[plot_function.subplot_value]  # try to recall the existing subplot
+    except KeyError:
+        # if it does not exist make a new subplot
+        subplots[plot_function.subplot_value] = fig.add_subplot(plot_function.subplot_value)
+        subplots[plot_function.subplot_value].grid(True)
+        ax = subplots[plot_function.subplot_value]
+
+    return ax,subplots
+
 
 def generate_plots(data_folder, plot_settings_path):
     # import plot settings from JSON file
     plot_settings = verbose_function_call(import_plot_settings, [plot_settings_path], "Importing Plot Settings")
     files = list(data_folder.glob("*.dat"))  # list of test files
     print("found {} data file(s) in test folder".format(len(files)))
+
+    # make paths for processed data
+    processed_data_path=data_folder.parent / "processed"
+    processed_data_path_data=processed_data_path / "data_files"
+    processed_data_path_images = processed_data_path / "images"
+    processed_data_path_data.mkdir(parents=True,exist_ok=True) # make the new path for processed data
+    processed_data_path_images.mkdir(parents=True, exist_ok=True)  # make the path for images
 
     for fig_num, file_path in enumerate(files):
         # for every file import data
@@ -162,16 +180,11 @@ def generate_plots(data_folder, plot_settings_path):
             0]) / 60  # convert time from seconds to minutes from st
         subplots = {}  # dict of existing subplots
         for fn_num, plot_function in enumerate(plot_settings):
-            print("Generating function {}. equation: {}".format(fn_num, plot_function.rpn_calculation))
+            print("Generating function {}".format(fn_num, plot_function.rpn_calculation))
             # in this figure make the required subplot and plot the data
 
             # set to the required subplot by either creating one or reusing one
-            try:
-                ax = subplots[plot_function.subplot_value]  # try to recall the existing subplot
-            except KeyError:
-                # if it does not exist make a new subplot
-                subplots[plot_function.subplot_value] = fig.add_subplot(plot_function.subplot_value)
-                ax = subplots[plot_function.subplot_value]
+            ax,subplots=set_subplots(fig,subplots,plot_function)
 
             x_val = decimate_data(time_arr, plot_function.decimation)  # decimate the time field
             # create they y-value of the function
@@ -185,8 +198,21 @@ def generate_plots(data_folder, plot_settings_path):
             ax.set_ylabel(plot_function.y_label)  # set the Y-Axis Label
             ax.set_xlabel("Time (min)")  # set the X-Axis label
             ax.legend()  # update the legend
+
+            # Export data to a file
+            filename=(file_path.stem+" "+plot_function.name+".dat").replace(" ", "_")
+            data_delimiter="\t"
+            data_format="%.2f\t%.6f"
+            saved_data_header="Time (s)"+data_delimiter+"processed_output"
+            np.savetxt(processed_data_path_data / filename,
+                       np.column_stack((60*x_val,y_val)),
+                       fmt=data_format,
+                       header=saved_data_header,
+                       delimiter=data_delimiter,
+                       newline="\n")
+        # Export image of figure
+        fig.savefig(processed_data_path_images / (file_path.stem+".pdf"), bbox_inches='tight')
     plt.legend()
-    plt.show()
 
 
 def import_data_from_file(file_path):
@@ -204,12 +230,6 @@ def import_data_from_file(file_path):
         return headers, data_dict
 
 
-def create_processed_data_folder(parent_path):
-    processed_data_path = parent_path / "processed"
-    if not processed_data_path.exists():
-        processed_data_path.mkdir()
-
-
 def get_plot_settings_file():
     plot_settings_path = Path("plot_settings")
     plot_settings_list = terminalio.get_files_with_extension(plot_settings_path, "json")
@@ -220,15 +240,22 @@ def get_plot_settings_file():
     return plot_settings_path / plot_settings_file
 
 
+def select_view_plots():
+    view_plots=terminalio.yes_no_prompt("Plots have been generated, display?",">")
+    if view_plots:
+        # if the want to see the plots, display them
+        print("Displaying plots")
+        plt.show()
+
 def main():
     # get path of folder to import data
-    print("ADPD5000 Datalog Plotter V{}.{}".format(version_major, version_minor))
+    print("ADPD5000 Datalog Plotter V{}.{}\n".format(version_major, version_minor))
     parent_path = get_test_directory()
-    create_processed_data_folder(parent_path)  # make a path if one does not exist to store the processed data
     data_folder = parent_path / "data"
     plot_settings_file = get_plot_settings_file()  # get user selected plot settings
     # TODO: Validate RPN Equations with REGEX and Raise error if not
     generate_plots(data_folder, plot_settings_file)
+    select_view_plots() # give the user the option to view the plots or exit the program
     print("Program Done, exiting")
 
 

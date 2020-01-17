@@ -56,6 +56,22 @@ def get_validated_list_selection(items, prompt, header, allow_abort=True):
     return selection
 
 
+def yes_no_prompt(header,prompt):
+    valid_responses=["y","n","yes","no"] # valid responses to prompt
+    valid_input=False # set input to invalid
+    print(header + " ([Y]es or [N]o)") # print the prompt
+    while not valid_input:
+        user_input=input(prompt).lower() # get the selection from the user
+        if user_input not in valid_responses:
+            print("[invalid user input]")
+        else:
+            valid_input=True
+    # return True or false depending on input
+    if user_input[0]=='y':
+        return True
+    else:
+        return False
+
 def get_code_directory():
     return os.path.dirname(os.path.realpath(__file__))
 

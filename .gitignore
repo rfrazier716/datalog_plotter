@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea/
+datalog_plotter/test_data/Test Dataset_2020101_111111/processed/data_files/dut0 Sensor Path 1
+datalog_plotter/test_data/Test Dataset_2020101_111111/processed/
